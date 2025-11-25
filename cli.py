@@ -9,9 +9,12 @@ def parse_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Примеры использования:
-  Шифрование:
+  Шифрование (ECB):
     python main.py --algorithm aes --mode ecb --encrypt --key 00112233445566778899aabbccddeeff --input text.txt --output encrypted.bin
   
+  Шифрование (CBC):
+    python main.py --algorithm aes --mode cbc --encrypt --key 00112233445566778899aabbccddeeff --input text.txt --output encrypted.bin
+
   Дешифрование:
     python main.py --algorithm aes --mode ecb --decrypt --key 00112233445566778899aabbccddeeff --input encrypted.bin --output decrypted.txt
         '''
@@ -21,8 +24,8 @@ def parse_arguments():
     parser.add_argument('--algorithm', required=True, choices=['aes'], 
                        help='Алгоритм шифрования (пока только aes)')
     
-    parser.add_argument('--mode', required=True, choices=['ecb'], 
-                       help='Режим работы (пока только ecb)')
+    parser.add_argument('--mode', required=True, choices=['ecb', 'cbc', 'cfb', 'ofb', 'ctr'], 
+                       help='Режим работы')
     
     # Режим работы (шифрование или дешифрование)
     mode_group = parser.add_mutually_exclusive_group(required=True)

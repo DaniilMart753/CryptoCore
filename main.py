@@ -7,8 +7,9 @@ CryptoCore - Главный файл программы
 import sys
 import os
 from cli import get_arguments
-from file_utils import read_file_binary, write_file_binary, generate_output_filename
-from crypto import aes_ecb_encrypt, aes_ecb_decrypt, hex_to_bytes
+from file_utils import read_file_binary, write_encrypted_file, read_encrypted_file, write_decrypted_file, generate_output_filename
+from crypto import hex_to_bytes
+from modes import encrypt_with_mode, decrypt_with_mode
 
 def main():
     """
@@ -22,45 +23,57 @@ def main():
         # 2. Определяем операцию
         operation = 'encrypt' if args.encrypt else 'decrypt'
         print(f"Операция: {operation}")
+        print(f"Режим: {args.mode}")
         
         # 3. Генерируем имя выходного файла если не указано
         output_file = generate_output_filename(args.input, operation, args.output)
         print(f"Входной файл: {args.input}")
         print(f"Выходной файл: {output_file}")
         
-        # 4. Читаем входной файл
-        print("Чтение файла...")
-        input_data = read_file_binary(args.input)
-        print(f"Прочитано {len(input_data)} байт")
-        
-        # 5. Конвертируем ключ из HEX в байты
+        # 4. Конвертируем ключ из HEX в байты
         print("Обработка ключа...")
         key_bytes = hex_to_bytes(args.key)
         print(f"Ключ: {args.key} -> {key_bytes.hex()}")
         
-        # 6. Выполняем операцию (шифрование/дешифрование)
-        print(f"Выполнение {operation}...")
+        # 5. Выполняем операцию (шифрование/дешифрование)
         if operation == 'encrypt':
-            result_data = aes_ecb_encrypt(input_data, key_bytes)
-            print("Шифрование завершено")
-        else:
-            result_data = aes_ecb_decrypt(input_data, key_bytes)
-            print("Дешифрование завершено")
-        
-        # 7. Записываем результат
-        print("Запись результата...")
-        write_file_binary(output_file, result_data)
-        print(f"Записано {len(result_data)} байт")
-        
-        # 8. Успех!
-        print(f"УСПЕХ! {operation.upper()} завершено!")
-        print(f"Результат сохранен в: {output_file}")
-        
-        if operation == 'encrypt':
-            print(f"Размер исходного файла: {len(input_data)} байт")
-            print(f"Размер зашифрованного файла: {len(result_data)} байт")
-        else:
-            print(f"Файл успешно расшифрован!")
+            # Читаем исходный файл
+            print("Чтение файла для шифрования...")
+            plaintext = read_file_binary(args.input)
+            print(f"Прочитано {len(plaintext)} байт")
+            
+            # Шифруем
+            print(f"Шифрование в режиме {args.mode}...")
+            iv, encrypted_data = encrypt_with_mode(plaintext, key_bytes, args.mode)
+            print(f"Сгенерирован IV: {iv.hex()}")
+            
+            # Записываем зашифрованные данные с IV
+            print("Запись зашифрованного файла...")
+            write_encrypted_file(output_file, iv, encrypted_data)
+            print(f"Записано {len(encrypted_data) + 16} байт (данные + IV)")
+            
+            print(f"УСПЕХ! Шифрование завершено!")
+            print(f"Результат сохранен в: {output_file}")
+            print(f"IV (hex): {iv.hex()}")
+            
+        else:  # decrypt
+            # Читаем зашифрованный файл и извлекаем IV
+            print("Чтение зашифрованного файла...")
+            iv, encrypted_data = read_encrypted_file(args.input)
+            print(f"Прочитано {len(encrypted_data)} байт данных")
+            print(f"Извлечен IV: {iv.hex()}")
+            
+            # Дешифруем
+            print(f"Дешифрование в режиме {args.mode}...")
+            decrypted_data = decrypt_with_mode(encrypted_data, key_bytes, args.mode, iv)
+            
+            # Записываем расшифрованные данные
+            print("Запись расшифрованного файла...")
+            write_decrypted_file(output_file, decrypted_data)
+            print(f"Записано {len(decrypted_data)} байт")
+            
+            print(f"УСПЕХ! Дешифрование завершено!")
+            print(f"Результат сохранен в: {output_file}")
             
     except FileNotFoundError as e:
         print(f"ОШИБКА: {e}", file=sys.stderr)

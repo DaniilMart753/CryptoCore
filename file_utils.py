@@ -71,6 +71,66 @@ def generate_output_filename(input_file, operation, output_file=None):
         else:
             return f"{base_name}.decrypted"
 
+def write_encrypted_file(file_path, iv, encrypted_data):
+    """
+    Записывает зашифрованные данные в файл с IV в начале
+    
+    Args:
+        file_path (str): Путь к файлу
+        iv (bytes): Вектор инициализации (16 байт)
+        encrypted_data (bytes): Зашифрованные данные
+    """
+    try:
+        # Создаем папки если их нет
+        directory = os.path.dirname(file_path)
+        if directory:
+            os.makedirs(directory, exist_ok=True)
+        
+        with open(file_path, 'wb') as file:
+            # Записываем IV (16 байт) в начало файла
+            file.write(iv)
+            # Записываем зашифрованные данные
+            file.write(encrypted_data)
+    except IOError as e:
+        raise IOError(f"Ошибка записи зашифрованного файла {file_path}: {e}")
+
+def read_encrypted_file(file_path):
+    """
+    Читает зашифрованный файл и извлекает IV и данные
+    
+    Args:
+        file_path (str): Путь к файлу
+        
+    Returns:
+        tuple: (iv, encrypted_data)
+    """
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Файл не найден: {file_path}")
+    
+    try:
+        with open(file_path, 'rb') as file:
+            # Читаем IV (первые 16 байт)
+            iv = file.read(16)
+            if len(iv) != 16:
+                raise ValueError("Некорректный формат файла: IV должен быть 16 байт")
+            
+            # Читаем остальные данные (зашифрованный текст)
+            encrypted_data = file.read()
+            
+            return iv, encrypted_data
+    except IOError as e:
+        raise IOError(f"Ошибка чтения зашифрованного файла {file_path}: {e}")
+
+def write_decrypted_file(file_path, decrypted_data):
+    """
+    Записывает расшифрованные данные в файл
+    
+    Args:
+        file_path (str): Путь к файлу
+        decrypted_data (bytes): Расшифрованные данные
+    """
+    write_file_binary(file_path, decrypted_data)
+    
 # Тестирование файловых операций
 if __name__ == "__main__":
     # Тест создания тестового файла
@@ -98,3 +158,4 @@ if __name__ == "__main__":
         
     except Exception as e:
         print(f"Ошибка при тесте файловых операций: {e}")
+
