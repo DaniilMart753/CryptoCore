@@ -1,42 +1,20 @@
-# CryptoCore
+# CryptoCore - Cryptographic Toolkit
 
-Минималистичный криптографический провайдер - учебный проект по криптографической защите информации.
+A command-line cryptographic tool implementing various encryption algorithms and modes.
 
-## История разработки
+## Milestones
 
-### Milestone 1
-- Базовая структура проекта
-- AES-128 ECB шифрование/дешифрование
-- CLI интерфейс с аргументами командной строки
-- PKCS7 паддинг
-- Работа с бинарными файлами
-- Автоматические тесты
+- [Milestone 1](milestones/ml1/) - Basic AES-128 ECB mode
+- [Milestone 2](milestones/ml2/) - Confidential modes (CBC, CFB, OFB, CTR) 
+- [Milestone 3](milestones/ml3/) - Cryptographically Secure Random Number Generation
 
-### Milestone 2
-- Реализация CBC, CFB, OFB, CTR режимов шифрования
-- Автоматическая генерация векторов инициализации (IV)
-- Сохранение и извлечение IV из зашифрованных файлов
-- Обработка различных режимов через единый интерфейс
-
-### Milestone 3 (в разработке)
-- Криптографически безопасная генерация случайных чисел
-- Генерация ключей если не указаны
-- CSPRNG модуль
-
-## Ветки разработки
-
-- **main** - текущая стабильная версия (все реализованные Milestone'ы)
-- **milestone-1** - базовая реализация AES-128 ECB
-- **milestone-2** - добавлены CBC, CFB, OFB, CTR режимы с IV
-
-## Как посмотреть конкретный Milestone
+## Quick Start
 
 ```bash
-# Переключиться на Milestone 1 (только ECB)
-git checkout milestone-1
+# Using current development version
+cd src
+python main.py --algorithm aes --mode cbc --encrypt --input file.txt --output encrypted.bin
 
-# Переключиться на Milestone 2 (все режимы + IV)  
-git checkout milestone-2
-
-# Вернуться к последней версии
-git checkout main
+# Or use specific milestone
+cd milestones/ml3
+python src/main.py --algorithm aes --mode cbc --encrypt --input file.txt --output encrypted.bin
